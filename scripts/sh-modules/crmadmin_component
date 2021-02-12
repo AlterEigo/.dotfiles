@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Script data
+dirpath="${dirpath:=$(pwd)}"
+templatesdir="${templatesdir:=$HOME/.templates}"
+
+# Requested vars
+sourcedir="${sourcedir:=${dirpath}/sources}"
+headerdir="${headerdir:=${dirpath}/headers}"
+layoutdir="${layoutdir:=${dirpath}/resources/xml}"
+stylesdir="${stylesdir:=${dirpath}/resources/css}"
+
+declare -A component_lib
+mod_crmcmp=(
+	"create"
+)
+
+create() {
+	cmp_regex='^[A-Z]{1}[A-Za-z]{1,}Component$'
+	cmp_name=${1}
+	if [[ ! "$cmp_name" =~ $cmp_regex ]]; then
+		echo "${0##*/}: Wrong component name convention!";
+		exit
+	fi
+
+	sed -e "s/COMPONENT_NAME/$cmp_name/g" \
+		"$templatesdir/TemplateComponent.hpp" > \
+		"$headerdir/Component/$cmp_name.hpp"
+	sed -e "s#COMPONENT_NAME#$cmp_name#g" \
+		-e "s+XML_DIR+${layoutdir#$dirpath/}+g" \
+		-e "s+CSS_DIR+${stylesdir#$dirpath/}+g" \
+		"$templatesdir/TemplateComponent.cpp" > \
+		"$sourcedir/Component/$cmp_name.cpp"
+
+	cp "$templatesdir/TemplateComponent.xml" "$layoutdir/$cmp_name.xml"
+	touch "$stylesdir/$cmp_name.css"
+}
