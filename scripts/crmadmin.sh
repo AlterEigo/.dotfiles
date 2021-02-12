@@ -50,4 +50,5 @@ component_handler() {
 	done
 }
 
+# Main function call
 main ${*#$0}
