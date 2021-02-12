@@ -5,6 +5,7 @@ dirpath=$(pwd)
 basedir=${0%/*}
 templatesdir="$HOME/.templates"
 sh_modulesdir="$basedir/sh-modules"
+shname="${shname:=${0##*/}}"
 
 # Project configuration
 sourcedir="${dirpath}/sources"
@@ -19,35 +20,43 @@ source "$sh_modulesdir/crmadmin_component"
 main() {
 	cmd=$1
 	rest=${*#$cmd}
-	declare -A ops
-	ops["component"]="component_handler"
-	ops["pwd"]="dirpath"
-	for c in ${!ops[@]}; do
+	if [[ -z "$*" ]]; then
+		echo "$shname: No arguments provided."
+		exit 1
+	fi
+	ops=( "component" )
+	for c in ${ops[@]}; do
 		if [[ "$cmd" == "$c" ]]; then
-			${ops[$c]} $rest
+			$c $rest
+			exit 0
 		fi
 	done
-}
-
-dirpath() {
-	echo "Current path is : $(pwd)"
+	echo "$shname: Command not found '$cmd'."
+	exit 1
 }
 
 # Main component module router
-component_handler() {
+component() {
 	cmd=$1
 	rest=${*#$cmd}
-	if [[ -z "$mod_crmcmp+x" ]]; then
-		echo "${0##*/}: Component library not found."
-		exit
+	if [[ -z "$*" ]]; then
+		echo "$shname::$FUNCNAME: No arguments provided."
+		exit 1
+	fi
+	if [[ -z "$mod_crmcmp" ]]; then
+		echo "$shname::$FUNCNAME: Component library not found."
+		exit 1
 	fi
 	declare -A ops
 	ops=${mod_crmcmp}
 	for c in ${ops[@]}; do
 		if [[ "$cmd" == "$c" ]]; then
 			$cmd $rest
+			exit 0
 		fi
 	done
+	echo "$shname::$FUNCNAME: Command not found '$cmd'."
+	exit 1
 }
 
 # Main function call
