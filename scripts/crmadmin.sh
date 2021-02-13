@@ -24,6 +24,17 @@ main() {
 		echo "$shname: No arguments provided."
 		exit 1
 	fi
+	
+	argv="$*"
+	rLONG_OPT='^--.{1,}$'
+	rSHORT_OPT='^-.$'
+	# Parse command options
+	for c in ${argv[@]}; do
+		if [[ "$c" =~ $rLONG_OPT || "$c" =~ $rSHORT_OPT ]]; then
+			echo "$shname::$FUNCNAME: option supplied: '$c'"
+		fi
+	done
+
 	ops=( "component" )
 	for c in ${ops[@]}; do
 		if [[ "$cmd" == "$c" ]]; then
