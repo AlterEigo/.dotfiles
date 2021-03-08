@@ -1,1 +1,0 @@
-/home/eigo/.config/i3
